@@ -1,0 +1,95 @@
+drop database if exists ej3;
+
+create database if not exists ej3;
+
+use ej3;
+
+create or replace table departamento(
+
+codigo int(3) primary key,
+nombre char(15) unique not null,
+director int(3),
+
+foreign key (director) references departamento(codigo)
+	on delete restrict
+	on update cascade
+);
+
+create or replace table profesor(
+
+nrp int(3) primary key,
+nombre char(15) not null,
+categoria char(15) not null,
+area char(15) not null,
+departamento int(3),
+ 
+foreign key (departamento) references departamento(codigo)
+	on delete restrict
+	on update cascade
+);
+
+create or replace table alumnos(
+
+dni varchar(9) primary key,
+direccion char(25) not null,
+beca char(15) null,
+fech_nac date not null
+
+);
+
+create or replace table asignatura(
+
+codigo int(3) primary key,
+caracter char(15) not null,
+curso char(15) not null,
+nombre char(25) not null
+);
+
+create or replace table grupo(
+
+codigo int(3),
+numero int(3),
+tipo char(25) not null,
+max_alums int(4) not null,
+tipo2 char(25) not null,
+
+primary key(codigo,numero)
+
+);
+
+create or replace table matriculados(
+
+convocatoria char(25),
+dni varchar(9),
+codigo int(3),
+nota float(4),
+
+primary key(convocatoria,dni,codigo),
+
+foreign key (dni) references alumnos(dni)
+	on delete restrict
+	on update cascade,
+	
+foreign key(codigo) references asignatura(codigo)
+	on delete restrict
+	on update cascade
+	
+);
+
+create or replace table profesor_grupos(
+
+nrp int(3),
+numero int(3),
+codigo int(3),
+
+primary key(nrp,numero,codigo),
+
+foreign key (nrp) references profesor(nrp)
+	on delete restrict
+	on update cascade,
+	
+foreign key(numero,codigo) references grupo(codigo,numero)
+	on delete restrict
+	on update cascade
+
+);
