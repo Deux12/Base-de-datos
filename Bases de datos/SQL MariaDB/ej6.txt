@@ -1,0 +1,41 @@
+drop database if exists ej6;
+
+create database if not exists ej6;
+
+use ej6;
+
+create or replace table plantas(
+
+num_planta int(3) primary key,
+superficie float(5) not null
+
+);
+
+create or replace table habitaciones(
+
+num_secuencial int(3),
+num_planta int(3),
+tipo char(15) not null,
+
+primary key (num_secuencial,num_planta),
+
+foreign key (num_planta) references plantas(num_planta)
+	on delete restrict
+	on update cascade
+
+);
+
+create or replace table hab_neo(
+
+num_planta int(3),
+num_secuencial int(3),
+
+primary key(num_planta,num_secuencial),
+
+foreign key (num_planta,num_secuencial) references habitaciones(num_secuencial,num_planta)
+	on delete restrict
+	on update cascade
+	
+
+
+);
