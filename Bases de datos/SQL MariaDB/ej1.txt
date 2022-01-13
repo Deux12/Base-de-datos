@@ -1,0 +1,66 @@
+drop database if exists ej1;
+
+create database if not exists ej1;
+
+use ej1;
+
+create or replace table aplicaciones(
+
+nombre_ape varchar(100) primary key,
+descripcion text not null
+
+)Engine = InnoDb;
+
+create or replace table programadores(
+
+nif char(9) primary key,
+nombre varchar(25) not null,
+nss int(11) unique not null,
+email varchar(50) unique not null
+
+) Engine = InnoDb;
+
+create or replace table incidencias(
+
+codigo int(2) primary key auto_increment,
+fech_apertura date not null,
+fech_cierre date null,
+programadores varchar(9) not null,
+aplicaciones varchar(100) not null,
+
+foreign key (programadores) references programadores(nif)
+on delete restrict
+on update cascade,
+
+foreign key (aplicaciones) references aplicaciones(nombre_ape)
+on delete cascade
+on update cascade
+);
+
+create or replace table versiones(
+
+id_version varchar(10),
+aplicaciones varchar(100),
+
+primary key (id_version, aplicaciones),
+
+foreign key (aplicaciones) references aplicaciones(nombre_ape)
+on delete cascade
+on update cascade
+)Engine = InnoDb;
+
+create or replace table programadores_incidencia(
+
+incidencias int (4) not null,
+programadores varchar(9) not null,
+primary key (incidencias,programadores),
+tiempo time not null,
+
+foreign key (incidencias) references incidencias(codigo)
+on delete cascade
+on update cascade,
+
+foreign key (programadores) references programadores(nif)
+on delete cascade
+on update cascade
+)Engine = InnoDb;
