@@ -36,6 +36,48 @@ foreign key (num_planta,num_secuencial) references habitaciones(num_secuencial,n
 	on delete restrict
 	on update cascade
 	
+);
 
+create or replace table hab_mate(
+
+num_plant int(3),
+num_secuencial int(3),
+telef varchar(9) null,
+baño int(2) not null,
+
+foreign key (num_plant, num_secuencial) references habitaciones(num_secuencial,num_planta)
+	on delete restrict
+	on update cascade
+);
+
+create or replace table camas(
+
+id int(3) primary key,
+num_secuencial int(3) not null,
+num_planta int(3) not null,
+fech_compra date not null,
+
+foreign key (num_secuencial,num_planta) references habitaciones(num_secuencial,num_planta)
+	on delete restrict
+	on update cascade
+);
+
+create or replace table pacientes(
+
+id int(3),
+num_historial int(3),
+fech_entrada date,
+fech_salida date not null,
+
+primary key (id,num_historial,fech_entrada),
+
+
+foreign key (id) references camas(id)
+	on delete restrict
+	on update cascade,
+	
+foreign key (num_historial) references pacientes(id)
+	on delete restrict
+	on update cascade
 
 );
