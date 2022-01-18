@@ -1,0 +1,134 @@
+drop database if exists ej7;
+
+create database if not exists ej7;
+
+use ej7;
+
+create table empleados(
+
+id int (3) primary key,
+direccion  varchar(25) not null,
+telef varchar(9) not null,
+fecha date not null,
+nombre varchar(15) not null
+
+);
+create table zona(
+
+nombre varchar(25) primary key,
+extension varchar(25) not null
+
+);
+
+create table especies(
+
+nom_cientf varchar(25) primary key,
+nombre varchar(25) not null,
+descripcion varchar(25) not null,
+zona varchar(25),
+
+foreign key (zona) references zona(nombre)
+	on delete restrict
+	on update cascade
+
+);
+
+create table habitats(
+
+nombre varchar(25) primary key,
+clima varchar(25) not null,
+vegetacion varchar(25) not null
+
+);
+
+create table continentes(
+
+continente varchar(25),
+habitats varchar(25),
+
+primary key (continente,habitats),
+
+foreign key (habitats) references habitats(nombre)
+	on delete restrict
+	on update cascade
+
+);
+
+create table habitats_especies(
+
+habitats varchar(25),
+especies varchar(25),
+
+primary key (habitats,especies),
+
+foreign key (habitats) references habitats(nombre)
+on delete cascade
+on update cascade,
+
+foreign key (especies) references especies(nom_cientf)
+on delete cascade
+on update cascade
+
+
+);
+
+create table  itinerarios(
+
+codigo int(3) primary key,
+max_num int(3) not null,
+num_especies int(3) not null,
+duracion time not null,
+longitud int(4) not null
+);
+
+
+
+create table itinerarios_zona(
+
+itinerario int(3),
+zon varchar(25),
+
+primary key (itinerario,zon),
+
+foreign key (itinerario) references itinerarios(codigo)
+	on delete cascade
+	on update cascade,
+
+foreign key (zon) references zona(nombre)
+	on delete cascade
+	on update cascade
+);
+
+create table especies_empleados(
+
+empleados int(3),
+especies varchar(25),
+
+primary key(empleados,especies),
+
+foreign key (empleados) references empleados(id)
+on delete cascade
+on update cascade,
+
+foreign key (especies) references especies(nom_cientf)
+on delete cascade
+on update cascade
+);
+
+create table itinerarios_empleados(
+
+itinerarios int(3),
+empleados int(3),
+horas int(3) not null,
+
+primary key (itinerarios,empleados),
+
+foreign key (itinerarios) references itinerarios(codigo)
+	on delete cascade
+	on update cascade,
+	
+foreign key (empleados) references empleados(id)
+	on delete cascade
+	on update cascade
+
+);
