@@ -6,8 +6,8 @@ use ej3;
 
 create or replace table departamento(
 
-codigo int(3) primary key,
-nombre char(15) unique not null,
+codigo int(3) primary key auto_increment,
+nombre varchar(30) unique not null,
 director int(3),
 
 foreign key (director) references departamento(codigo)
@@ -17,50 +17,55 @@ foreign key (director) references departamento(codigo)
 
 create or replace table profesor(
 
-nrp int(3) primary key,
+nrp char(15) primary key,
 nombre char(15) not null,
-categoria char(15) not null,
-area char(15) not null,
-departamento int(3),
+categoria varchar(15) not null,
+area varchar(50) not null,
+departamento int(3) default 0,
  
 foreign key (departamento) references departamento(codigo)
-	on delete restrict
+	on delete set default
 	on update cascade
 );
 
 create or replace table alumnos(
 
-dni varchar(9) primary key,
+dni char(9) primary key,
 direccion char(25) not null,
-beca char(15) null,
-fech_nac date not null
+beca bool not null default false,
+fech_nac date not null,
+nombre varchar(25) not null
 
 );
 
 create or replace table asignatura(
 
-codigo int(3) primary key,
-caracter char(15) not null,
-curso char(15) not null,
-nombre char(25) not null
+codigo int(3) primary key auto_increment,
+caracter enum('troncal','obligatoria','optativa') not null,
+curso char(2) not null,
+creditos int(3) not null,
+nombre varchar(25) not null
 );
 
 create or replace table grupo(
 
 codigo int(3),
 numero int(3),
-tipo char(25) not null,
-max_alums int(4) not null,
-tipo2 char(25) not null,
+tipo enum('teorica','practica') not null,
+max_alums int(3) not null,
 
-primary key(codigo,numero)
+primary key(codigo,numero),
+
+foreign key (codigo) references asignatura(codigo)
+	on delete cascade
+	on update cascade
 
 );
 
 create or replace table matriculados(
 
 convocatoria char(25),
-dni varchar(9),
+dni char(9),
 codigo int(3),
 nota float(4),
 
@@ -78,18 +83,38 @@ foreign key(codigo) references asignatura(codigo)
 
 create or replace table profesor_grupos(
 
-nrp int(3),
+nrp char(15),
 numero int(3),
 codigo int(3),
 
 primary key(nrp,numero,codigo),
 
 foreign key (nrp) references profesor(nrp)
-	on delete restrict
+	on delete cascade
 	on update cascade,
 	
 foreign key(numero,codigo) references grupo(codigo,numero)
-	on delete restrict
+	on delete cascade
 	on update cascade
 
 );
+
+create or replace table alum_grupo(
+
+dni char(9),
+codigo int(3),
+numero int(3),
+
+primary key (dni,codigo,numero),
+
+foreign key (dni) references alumnos(dni)
+	on delete cascade
+	on update cascade,
+	
+foreign key (codigo,numero) references grupo(codigo,numero)
+	on delete cascade
+	on update cascade
+
+);
+
+
