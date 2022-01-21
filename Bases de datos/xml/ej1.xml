@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<pedido>
+    <para>Juan Delgado Martínez</para>
+    <es>Bicicleta</es>
+    <modelo>A2023</modelo>
+    <entrega>
+        <calle>Barco</calle>
+        <numero>4</numero>
+        <piso>tercer</piso>
+        <letra>A</letra>
+        <dia>19-5-2000</dia>
+    </entrega>
+</pedido>
