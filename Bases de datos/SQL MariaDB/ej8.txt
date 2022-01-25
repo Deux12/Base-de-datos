@@ -1,0 +1,113 @@
+drop database if exists ej8;
+
+create database if not exists ej8;
+
+use ej8;
+
+create or replace table inventor(
+
+dni int(9) primary key,
+direccion varchar(25) not null,
+telf varchar(9) not null
+
+);
+
+create or replace table asesor(
+
+invento int auto_increment,
+inventor int(9),
+primary key(invento, inventor),
+
+foreign key (inventor) references inventor(dni)
+	on delete cascade  /*no me deja poner set null*/
+	on update cascade
+
+);
+
+create or replace table empresa(
+
+codigo int primary key auto_increment,
+nombre varchar(25) not null,
+direccion varchar(100) not null
+
+
+);
+
+create or replace table telefono(
+
+telef char(9),
+empresa int,
+primary key(telef, empresa),
+
+foreign key (empresa) references empresa(codigo)
+	on delete cascade
+	on update cascade
+
+);
+
+
+create or replace table patente(
+
+num_patente int primary key auto_increment,
+nombre varchar(30) not null,
+empresa int,
+inventor int(9),
+
+foreign key (inventor) references inventor(dni)
+	on delete restrict
+	on update cascade,
+
+foreign key (empresa) references empresa(codigo)
+	on delete restrict
+	on update cascade
+
+);
+
+create or replace table empresa_inventor(
+
+inventor int(9),
+empresa int,
+fecha date null,
+num int null,
+
+primary key(inventor, empresa),
+
+foreign key (inventor) references inventor(dni)
+	on delete cascade /*no me deja poner set null*/
+	on update cascade,
+ 
+foreign key (empresa) references empresa(codigo)
+	on delete cascade  /*no me deja poner set null*/
+	on update cascade 
+);
+
+create or replace table ayudante(
+
+dni int(9) primary key,
+telef char(9) not null,
+direccion varchar(100) not null,
+nombre varchar(50) not null,
+inventor int(9),
+
+foreign key (inventor) references inventor(dni)
+	on delete restrict
+	on update cascade
+);
+
+create or replace table empresa_ayudante(
+
+empresa int,
+ayudante int(9),
+num int null,
+fecha date null,
+
+primary key(empresa,ayudante),
+
+foreign key (empresa) references empresa(codigo)
+	on delete cascade  /*no me deja poner set null*/
+	on update cascade,
+	
+foreign key (ayudante) references ayudante(dni)
+	on delete cascade
+	on update cascade
+);

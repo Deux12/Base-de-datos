@@ -1,0 +1,98 @@
+drop database if exists ej9;
+
+create database if not exists ej9;
+
+use ej9;
+
+create or replace table clientes(
+
+dni int(9) primary key,
+direccion varchar(100) not null,
+telef char(9) not null,
+nombre varchar(25) not null
+
+);
+
+create or replace table agentes(
+
+dni int(9) primary key,
+direccion varchar(100) not null,
+telef char(9) not null,
+nombre varchar(25) not null
+
+);
+
+create or replace table seguros(
+
+id int primary key auto_increment,
+prima double not null,
+tipo enum('hogar','vida','automóvil'),
+
+agentes int(9),
+
+foreign key (agentes) references agentes(dni)
+	on delete cascade
+	on update cascade,
+	
+fecha date not null,
+cartera double not null,
+clientes int(9),
+
+foreign key (clientes) references clientes(dni)
+	on delete restrict
+	on update cascade
+
+);
+create or replace table hogar(
+
+id int primary key auto_increment,
+continente double not null,
+contenido text not null,
+riegos enum('responsabilidad civil','asalto','otros'),
+/* FALTAN LOS ESTUDIOS*/
+
+foreign key (id) references seguros(id)
+	on delete cascade
+	on update cascade
+
+);
+create or replace table vida(
+
+id int primary key auto_increment,
+profesion varchar(25) not null,
+cobertura double not null,
+/*FALTA EL BENEFICIARIO*/
+
+foreign key (id) references seguros(id)
+	on delete cascade
+	on update cascade
+);
+
+create or replace table automovil(
+
+id int primary key auto_increment,
+categoria varchar(50) not null,
+año_fabricacion date not null,
+cobertura enum('todo riesgo','franquicia','terceros','otro') not null,
+matricula char(9) not null,
+fecha_nac date not null,
+
+foreign key (id) references seguros(id)
+	on delete cascade
+	on update cascade
+
+);
+create or replace table agentes_clientes(
+
+clientes int(9),
+agentes int(9),
+
+primary key(clientes,agentes),
+
+foreign key (clientes) references clientes(dni)
+	on delete cascade
+	on update cascade,
+foreign key (agentes) references agentes(dni)
+	on delete cascade
+	on update cascade
+);
