@@ -1,0 +1,175 @@
+drop database if exists MarketPlace;
+
+create database if not exists MarketPlace;
+
+use MarketPlace;
+
+create or replace table Login(
+
+ID int auto_increment not null primary key,
+Nickname varchar(25) not null unique,
+Email varchar(50) not null,
+Contrasenia blob(256) not null
+);
+
+create or replace table Usuario(
+
+Dni char(9) not null primary key,
+Nombre varchar(25) not null,
+País varchar(25) not null,
+Apellidos  varchar(100) not null,
+Telefono char(9) not null,
+Login int,
+
+foreign key (Login) references Login(ID)
+	on delete cascade
+	on update cascade
+);
+
+create or replace table Ventas(
+
+ID int auto_increment not null primary key,
+Fecha date not null,
+Hora time not null,
+Login int,
+
+foreign key (Login) references Login(ID)
+	on delete cascade
+	on update cascade
+);
+
+create or replace table Packs(
+
+ID int auto_increment not null primary key,
+PrecioVenta double not null,
+PVP double not null,
+SumaProductos int not null
+);
+
+create or replace table VentasPacks(
+
+Ventas int,
+Packs int,
+primary key(Ventas,Packs),
+
+foreign key (Ventas) references Ventas(ID)
+	on delete cascade 
+	on update cascade,
+foreign key (Packs) references Packs(ID)
+	on delete cascade
+	on update cascade
+);
+
+create table Productos(
+
+ID int auto_increment not null primary key,
+Modelo varchar(50) not null,
+PVP double not null,
+Stock int not null,
+PrecioVenta double not null,
+Marca varchar(50) not null,
+PrecioRecomendado double not null
+
+
+);
+
+create or replace table VentasProductos(
+
+Ventas int,
+Productos int,
+primary key(Ventas,Productos),
+
+foreign key (Ventas) references Ventas(ID)
+	on delete cascade 
+	on update cascade,
+foreign key (Productos) references Productos(ID)
+	on delete cascade 
+	on update cascade
+
+);
+
+create or replace table PacksProductos(
+
+Packs int,
+Productos int,
+primary key (Packs,Productos),
+
+foreign key (Productos) references Productos(ID)
+	on delete cascade 
+	on update cascade,
+	
+foreign key (Packs) references Packs(ID)
+	on delete cascade
+	on update cascade
+);
+
+create or replace table Direcciones(
+
+Codigo int not null auto_increment primary key,
+Letra char null,
+Piso char null,
+Poblacion double not null,
+Num int not null,
+CodPostal char(5) not null,
+Calle varchar(50)
+);
+
+create or replace table UsuarioDirecciones(
+
+Usuario char(9),
+Direcciones int,
+primary key (Usuario, Direcciones),
+
+foreign key (Usuario) references Usuario(Dni)
+	on delete cascade 
+	on update cascade,
+	
+foreign key (Direcciones) references Direcciones(Codigo)
+	on delete cascade 
+	on update cascade
+);
+
+create or replace table Envíos(
+
+ID int auto_increment not null primary key,
+Compania varchar(50) not null,
+Fecha date not null,
+Descripcion varchar(500) not null,
+Direcciones int,
+
+foreign key (Direcciones) references Direcciones(Codigo)
+	on delete cascade 
+	on update cascade
+);
+
+create or replace table Componentes(
+
+Productos int primary key,
+tipo enum('tarjeta gráfica','memoria ram','placa base','disco duro ssd','disco duro hdd',
+'tarjeta de red','tarjeta de sonido','ventilador','refrigeración líquida','fuente de alimentación',
+'procesador','otros') default 'otros',
+Conexion varchar(100) not null,
+
+foreign key (Productos) references Productos(ID)
+	on delete cascade 
+	on update cascade
+);
+
+create or replace table Perifericos(
+
+Productos int primary key,
+tipo enum('monitor','teclado','ratón','impresora','escáner','proyector','auriculares','altavoces',
+'impresora multifunción','impresora 3D','otros') default 'otros'
+);
+
+create or replace table PerifericosConexiones(
+
+Perifericos int,
+Conexiones enum('Usb','hdmi','vga','bluetooth','wifi','LAN','usb-c','mirco-hdmi',
+'micro-usb','lightning','otros') default 'otros',
+
+foreign key (Perifericos) references Perifericos(Productos)
+	on delete cascade 
+	on update cascade
+
+);
