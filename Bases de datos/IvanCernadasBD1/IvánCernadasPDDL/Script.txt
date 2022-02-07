@@ -106,8 +106,8 @@ foreign key (Packs) references Packs(ID)
 create or replace table Direcciones(
 
 Codigo int not null auto_increment primary key,
-Letra char null,
-Piso char null,
+Letra char(1) null,
+Piso int null,
 Poblacion varchar(50) not null,
 Num int not null,
 CodPostal char(5) not null,
