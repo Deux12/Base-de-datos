@@ -1,0 +1,84 @@
+1.Obtener todos los datos almacenados de las aplicaciones (nombre y descripción).
+	
+select a.NOMBRE , a.DESCRIPCION 
+from aplicaciones as a
+	
+2.Obtener el NIF y el nombre de los programadores.
+	
+select p.NIF, p.NOMBRE 
+from programadores as p
+	
+3.Obtener todas las incidencias que todavía no han sido cerradas.
+	
+select * 
+from incidencias
+where FECHA_CIERRE is null
+	
+4.Obtener todos los programadores que han participado en la incidencia 1.
+	
+select *
+from programador_incidencia 
+where INCIDENCIA = 1
+	
+5.Obtener todas las incidencias en las que ha participado el programador con DNI 10264495D.
+	
+select *
+from programador_incidencia 
+where PROGRAMADOR = "10264495D"	
+	
+6.Obtener el tiempo total que se ha trabajado en la incidencia 170.
+	
+select sum(tiempo)
+from programador_incidencia 
+where INCIDENCIA = 170
+	
+7.Obtener el nombre de la aplicación con más versiones y la cantidad de versiones de esta.
+	
+
+	
+8.Obtener el nombre de la aplicación con la versión más alta y cuál es.
+	
+select ID_VERSION , APLICACION 
+from versiones 
+where ID_VERSION = (select max(ID_VERSION) from versiones )
+	
+9.Obtener la incidencia más antigua iniciada y la más actual iniciada (en una sola consulta).
+	
+select min(FECHA_APERTURA), max(FECHA_APERTURA) 
+from incidencias	
+	
+10.Obtener el email y el NSS de los programadores que han participado en incidencias de la aplicación OrTravel.
+	
+select p.EMAIL , p.NSS 
+from incidencias as i , programadores as p 
+where APLICACION = "OrTravel"	
+	
+11.Obtener el nombre y la descripción de todas las aplicaciones que comienzan por S.
+	
+select *
+from aplicaciones as a
+where upper(left(a.NOMBRE ,1)="S")
+	
+12.Obtener el nombre completo de todos los programadores cuyo NSS termina por 6.
+	
+select p.NSS 
+from programadores as p 
+where p.NSS like '%6'
+	
+13.Obtener todos los datos de los programadores que tengan un email del dominio de gmail.com.
+	
+select p.EMAIL 
+from programadores as p
+where p.EMAIL like '%gmail.com'
+	
+14.Obtener el nombre de todos los programadores ordenados por orden alfabético en base a su nombre.
+	
+select p.NOMBRE 
+from programadores as p 
+order by p.NOMBRE 	
+	
+15.Obtener todos los datos de las aplicaciones cuya descripción contenga menos de 20 caracteres.
+
+select character_length(a.DESCRIPCION)
+from aplicaciones as a
+order by character_length(a.DESCRIPCION) 

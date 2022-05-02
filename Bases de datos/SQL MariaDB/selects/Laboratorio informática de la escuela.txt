@@ -1,0 +1,57 @@
+1.Obtener el nombre completo de todos los becarios ordenado por orden alfabético en base a los apellidos y en el orden: apellidos, nombre.
+	
+	
+	
+2.Obtener todos los datos de los becarios ordenados por edad, de más joven a menos. 
+	
+	
+	
+3.Obtener el nombre completo de todos los becarios junto con el nombre completo de sus sustitutos. Utilizar subconsultas.
+	
+	
+	
+4.Obtener el dni y la fecha de nacimiento de todos los becarios menores de 23 años.
+	
+	
+	
+5.Obtener todas las webs y los nombres de fabricantes cuyas webs todavía son inseguras, es decir, que no siguen el protocolo https si no que todavía mantienen el http. 
+	
+	
+	
+6.Obtener las direcciones ip de todos los ordenadores de los laboratorios 1, 2 y 3.
+	
+	
+	
+7.Obtener las descripciones de todos los componentes fabricados por Peter Underhill.
+	
+	
+	
+8.Obtener las descripciones de todos los componentes de los ordenadores del laboratorio 6. 
+	
+	
+	
+9.Obtener todos los datos de los ordenadores comprados en este milenio.
+	
+	
+	
+10.Obtener el nombre y el apellido de los supervisores de los laboratorios de la segunda planta.
+	
+	
+	
+11.Obtener una agrupación de las ip de los ordenadores en base a los supervisores que vigilan los laboratorios dónde están alojados. Agrupar estas IP por supervisores y mostrar también el nombre completo de dicho supervisor y el id del laboratorio en el que está cada ordenador.
+	
+	
+	
+12.Obtener los teléfonos de los fabricantes cuya página web sea segura. 
+	
+	
+	
+13.Obtener el nombre del fabricante del que más componentes se almacenan.
+	
+	
+	
+14.Obtener todos los datos de los componentes agrupados por fabricantes y ordenados por el id del fabricante de mayor a menor.
+	
+	
+	
+15.Obtener los componentes de los ordenadores del laboratorio 6.
