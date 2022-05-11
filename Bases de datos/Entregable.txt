@@ -1,3 +1,4 @@
+
 drop database if exists jugueteria;
 
 create database jugueteria;
@@ -61,7 +62,7 @@ delete
 			update
 				cascade,
 				constraint ck_pventa_2 check (PVenta >= 0)
-				# constraint ck_uds check (Uds > 0 and Uds <=( select Articulo.Uds from Articulo where Articulo.Cod_art = Tic_art.Cod_art)),
+# constraint ck_uds check (Uds > 0 and Uds <=( select Articulo.Uds from Articulo where Articulo.Cod_art = Tic_art.Cod_art)),
 );
 
 delete from	articulo ;
@@ -255,3 +256,128 @@ grant all privileges on ticket to admin;
 grant select, insert, delete on articulo to cajero;
 grant select, insert, delete on ticket to cajero;
 grant select, insert, delete on tic_art to cajero;
+
+grant show view on resumen_ticket to supervisor;
+
+#Programar una función que obtenga el nombre del usuario que está usando la caja
+#en el momento actual
+
+SET GLOBAL log_bin_trust_function_creators = 1;
+
+delimiter $$
+
+drop function if exists actual_user $$
+create function actualUser()
+returns varchar(10)
+
+begin
+		declare caj varchar(10);
+		select rc.Nomb_caj into caj
+		from reg_caja rc where rc.F_fin is null;
+		return caj;
+	
+end $$
+
+delimiter ;
+
+#y otro que devuelva el nombre del último usuario que usó la
+#caja si no hay nadie usándola (si está abierta debe devolver NULL).
+
+delimiter $$
+
+drop function if exists lastUser $$
+create function lastUser()
+returns varchar(10)
+
+begin
+	
+	declare caj varchar(10);
+		select rc.Nomb_caj into caj
+		from reg_caja rc where rc.F_fin = (select max(rc.F_fin) from reg_caja rc);
+		return caj;
+end;
+$$
+
+delimiter ;
+
+#Añadir un mecanismo para que, cada vez que la caja se asigne a un usuario, a éste
+#le sea asignado en ese momento el rol cajero; este rol le debe ser retirado cuando el
+#usuario ya no tenga asignada la caja.
+
+delimiter $$
+
+drop trigger if exists actualizar_cajero $$
+create trigger actualizar_cajero after insert on reg_caja
+for each row 
+
+BEGIN
+	DECLARE grt VARCHAR(50);
+	SET grt = ' GRANT cajero TO ' or new.Nomb_caj or ';';
+	call grt;
+END;
+	
+$$
+
+delimiter ;
+
+
+#Crear una nueva tabla Pedido, que almacena para cada artículo el número de uds
+#que se piden, la fecha en que se registra el pedido, la fecha en que se lleva a cabo,
+#y la fecha en que se recibe. Estos dos últimos campos tendrán valor NULL mientras
+#no se pide y recibe el artículo, respectivamente.
+
+create table pedido(
+
+cod int primary key auto_increment,
+art varchar(10),
+uds int not null,
+fecha_reg timestamp,
+fecha_c timestamp default null,
+fecha_rec timestamp default null,
+
+foreign key (art) references articulo(Cod_art)
+	on delete cascade
+	on update cascade
+);
+
+#Añadir a cada artículo un campo que indique el número de uds óptimo que se deben
+#tener en tienda del mismo (por defecto 6).
+
+alter table articulo
+add column op_uds int default '6';
+	
+#Crear un procedimiento nuevo que
+#registre para cada artículo con X o menos uds disponibles (X es un valor variable)
+#una nueva línea de pedido por tantas uds como hagan falta para alcanzar las uds
+#óptimas.
+#Se debe tener en cuenta que ya puede existir un pedido para ese artículo pendiente
+#de ser llevado a cabo. En ese caso, solamente se deberá ajustar el número de uds a
+#pedir
+
+
+#Crear un disparador que registre un nuevo pedido de un artículo cuando la tienda se
+#quede sin stock o con solo una unidad del mismo.
+
+delimiter $$
+
+drop trigger if exists register_art $$
+create trigger register_art after delete on articulo
+for each row 
+
+begin 
+	
+	if a.Uds = 0 or a.Uds = 1 then 
+	insert into pedido (cod,art,uds,fecha_reg,fecha_c,fecha_rec) 
+	values ('001','klk',3,CURRENT_DATE,null,null);
+
+end; $$
+
+delimiter ;
+
+#Crear un procedimiento que ponga como recibido con la fecha actual el pedido de un
+#artículo dado, aumentando el stock del mismo en el número de uds recibidas.
+
+
+drop procedure if exists recibir $$
+create procedure 
+
