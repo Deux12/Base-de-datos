@@ -361,23 +361,30 @@ add column op_uds int default '6';
 delimiter $$
 
 drop trigger if exists register_art $$
+
 create trigger register_art after delete on articulo
 for each row 
-
 begin 
-	
-	if a.Uds = 0 or a.Uds = 1 then 
-	insert into pedido (cod,art,uds,fecha_reg,fecha_c,fecha_rec) 
-	values ('001','klk',3,CURRENT_DATE,null,null);
 
-end; $$
+	if a.Uds <= 1 then 
+	insert into pedido (cod,art,uds,fecha_reg,fecha_c,fecha_rec) 
+	values ('001','artículo','3',CURRENT_DATE,null,null);
+	end if;
+end; 
+
+$$
 
 delimiter ;
 
 #Crear un procedimiento que ponga como recibido con la fecha actual el pedido de un
 #artículo dado, aumentando el stock del mismo en el número de uds recibidas.
 
+delimiter $$
 
-drop procedure if exists recibir $$
-create procedure 
+drop procedure if exists pedido_recibido 
 
+begin
+	
+end
+
+delimiter ;
