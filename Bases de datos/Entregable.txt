@@ -354,6 +354,28 @@ add column op_uds int default '6';
 #de ser llevado a cabo. En ese caso, solamente se deberá ajustar el número de uds a
 #pedir
 
+DROP PROCEDURE IF EXISTS registro_art;
+DELIMITER $$
+
+CREATE PROCEDURE registro_art()
+BEGIN
+	DECLARE n INT DEFAULT 0;
+	DECLARE i INT DEFAULT 0;
+	declare uds_nec int;
+	SELECT COUNT(*) FROM articulo a  INTO n;
+	SET i=0;
+	WHILE i<n DO 
+	if a.Uds < a.op_uds then 
+	select (a2.op_uds - a2.Uds) as resta from articulo a2 into uds_nec ;
+	insert into pedido(cod,art,uds,fecha_reg,fecha_c,fecha_rec) values 
+	('001',a.Descrip,uds_nec,CURRENT_DATE,null,null);
+	end if;
+	  SET i = i + 1;
+END WHILE;
+End;
+$$
+
+delimiter ;
 
 #Crear un disparador que registre un nuevo pedido de un artículo cuando la tienda se
 #quede sin stock o con solo una unidad del mismo.
@@ -368,7 +390,7 @@ begin
 
 	if a.Uds <= 1 then 
 	insert into pedido (cod,art,uds,fecha_reg,fecha_c,fecha_rec) 
-	values ('001','artículo','3',CURRENT_DATE,null,null);
+	values ('001',a.Descrip,'1',CURRENT_DATE,null,null);
 	end if;
 end; 
 
@@ -379,11 +401,14 @@ delimiter ;
 #Crear un procedimiento que ponga como recibido con la fecha actual el pedido de un
 #artículo dado, aumentando el stock del mismo en el número de uds recibidas.
 
+
 delimiter $$
 
-drop procedure if exists pedido_recibido 
+drop procedure if exists recb_art $$
 
-begin
+create procedure recb_pedido (in pedido int);
+begin 
+	update pedido set f.fecha_rec = current_timestamp() and f.uds = f.
 	
 end
 
