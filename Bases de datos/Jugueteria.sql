@@ -81,7 +81,7 @@ insert
 	Descrip,
 	Uds,
 	PVenta)
-values ('001', 'MuÃ±eco de plastico', 10, 15),
+values ('001', 'Muñeco de plastico', 10, 15),
 ('002', 'Pelota de goma', 20, 20),
 ('003', 'Paquete de piezas montables', 35, 10.5),
 ('004', 'Baraja de Cartas', 5, 5),
@@ -89,8 +89,8 @@ values ('001', 'MuÃ±eco de plastico', 10, 15),
 ('006', 'Mini futbolin', 2, 23),
 ('007', 'Yo-yo', 25, 4),
 ('008', 'Bicicleta', 23, 199),
-('009', 'MuÃ±eco de acciÃ³n', 50, 25),
-('010', 'MuÃ±eca', 32, 9.5),
+('009', 'Muñeco de acción', 50, 25),
+('010', 'Muñeca', 32, 9.5),
 ('011', 'Cometa', 7, 8);insert into cajero (Nomb_caj) values ('Julio'),('Maria'),('Emilio');insert into reg_caja (Cod_reg,Nomb_caj,F_inicio,F_fin)
 values (1,'Julio','2015-01-06 10:00:00','2015-01-06 18:00:00'),
 (2,'Maria','2015-01-07 10:00:00','2015-01-07 18:00:00'),
@@ -143,7 +143,7 @@ values ('001', '001', 1, 15),
 
 /*
 * 1. Obtener a partir de los tickets de caja el importe total vendido en efectivo por
-cada empleado en el dÃ­a actual.
+cada empleado en el día actual.
 * */
 
 SELECT Nomb_caj, SUM(PVenta * Uds) AS ImpTotal
@@ -152,7 +152,7 @@ WHERE CAST(Fecha_hora AS DATE) = CURRENT_DATE AND Efectivo = 1
 GROUP BY Nomb_caj;
 
 /*
-* 2. Mostrar el nombre del empleado que ha vendido mÃ¡s artÃ­culos durante el aÃ±o
+* 2. Mostrar el nombre del empleado que ha vendido más artículos durante el año
 2015.
 * */
 SELECT Nomb_caj
@@ -162,8 +162,8 @@ HAVING SUM(Uds) = ( SELECT MAX(Ventas2015) FROM ( SELECT SUM(Uds) AS Ventas2015 
 ON t2.Cod_tic = ta2.Cod_tic WHERE EXTRACT(YEAR FROM Fecha_hora) = 2015 GROUP BY Nomb_caj ) as ventas
 );
 /*
-* 3. Listar los artÃ­culos que no se han vendido en el mes de mayo de 2016,
-ordenados por el nÃºmero de existencias, de mayor a menor.
+* 3. Listar los artículos que no se han vendido en el mes de mayo de 2016,
+ordenados por el número de existencias, de mayor a menor.
 * */
 
 SELECT * FROM Articulo a WHERE a.Cod_art NOT in
@@ -171,15 +171,15 @@ SELECT * FROM Articulo a WHERE a.Cod_art NOT in
 ON t.Cod_tic = ta.Cod_tic WHERE CAST(Fecha_hora AS DATE) BETWEEN '2016-05-01 00:00:00' AND '2016-05-31 23:59:59'
 ) ORDER BY Uds DESC;
 
-# La consulta para obtener el listado de tickets errÃ³neos serÃ­a:
+# La consulta para obtener el listado de tickets erróneos sería:
 SELECT Ticket.*
 FROM Ticket, Reg_caja
 WHERE Ticket.Nomb_caj <> Reg_caja.Nomb_caj and Fecha_hora
 BETWEEN F_inicio AND F_fin;
 
-# Escribir el SQL necesario para aÃ±adir a la BD un mecanismo que verifique que el
+# Escribir el SQL necesario para añadir a la BD un mecanismo que verifique que el
 # nombre del usuario que figura en un ticket cuando se crea se corresponde con el
-# usuario que estÃ¡ usando la caja en ese momento.
+# usuario que está usando la caja en ese momento.
 
 DELIMITER $$
 
@@ -197,7 +197,7 @@ end
 
 DELIMITER ; 
 
-# Crear una vista que muestre para cada ticket Ãºnicamente la informaciÃ³n
+# Crear una vista que muestre para cada ticket únicamente la información
 # correspondiente a la fecha y a su importe total, desglosado en base e IVA.
 /*
 DELIMITER //
@@ -218,25 +218,25 @@ END;
 
 DELIMITER ; */
 
-# Modificar la informaciÃ³n que se guarda de cada artÃ­culo para aÃ±adir el porcentaje de
+# Modificar la información que se guarda de cada artículo para añadir el porcentaje de
 # IVA que le corresponde, poniendo 21% a los ya existentes.
 
 ALTER TABLE Articulo ADD IVA REAL DEFAULT 0.21;
 UPDATE Articulo SET IVA = 0.21;
 
-#Crear una vista que muestre para cada ticket Ãºnicamente la informaciÃ³n
+#Crear una vista que muestre para cada ticket únicamente la información
 #correspondiente a la fecha y a su importe total, desglosado en base e IVA.
 
 create view  resumen_ticket as 
-SELECT t.Fecha_hora AS Fecha, CONCAT(SUM(ta.Uds * a.PVenta), "â‚¬") AS Importe,
+SELECT t.Fecha_hora AS Fecha, CONCAT(SUM(ta.Uds * a.PVenta), "€") AS Importe,
 FORMAT(SUM(ta.Uds * a.PVenta * a.iva / (1 + a.iva)),2) AS Importe_IVA,
 FORMAT(SUM(ta.Uds * a.PVenta / (1 + a.iva)),2) AS Importe_Base
 FROM Ticket t, Tic_Art ta, Articulo a where a.Cod_art = ta.Cod_art and t.Cod_tic = ta.Cod_tic group by t.Cod_tic ;
 
 #Crear tres roles en la BD: admin, cajero y supervisor. Definir permisos sobre la BD
 #de forma que los usuarios con el rol cajero puedan introducir, borrar y actualizar la
-#informaciÃ³n correspondiente a las ventas; los usuarios del rol supervisor Ãºnicamente
-#podrÃ¡n acceder a la informaciÃ³n que proporciona la vista creada en el paso anterior.
+#información correspondiente a las ventas; los usuarios del rol supervisor únicamente
+#podrán acceder a la información que proporciona la vista creada en el paso anterior.
 #Los usuarios del rol admin tienen acceso total a la BD.
 
 drop role if exists admin;
@@ -259,7 +259,7 @@ grant select, insert, delete on tic_art to cajero;
 
 grant show view on resumen_ticket to supervisor;
 
-#Programar una funciÃ³n que obtenga el nombre del usuario que estÃ¡ usando la caja
+#Programar una función que obtenga el nombre del usuario que está usando la caja
 #en el momento actual
 
 SET GLOBAL log_bin_trust_function_creators = 1;
@@ -280,8 +280,8 @@ end $$
 
 delimiter ;
 
-#y otro que devuelva el nombre del Ãºltimo usuario que usÃ³ la
-#caja si no hay nadie usÃ¡ndola (si estÃ¡ abierta debe devolver NULL).
+#y otro que devuelva el nombre del último usuario que usó la
+#caja si no hay nadie usándola (si está abierta debe devolver NULL).
 
 delimiter $$
 
@@ -300,7 +300,7 @@ $$
 
 delimiter ;
 
-#AÃ±adir un mecanismo para que, cada vez que la caja se asigne a un usuario, a Ã©ste
+#Añadir un mecanismo para que, cada vez que la caja se asigne a un usuario, a éste
 #le sea asignado en ese momento el rol cajero; este rol le debe ser retirado cuando el
 #usuario ya no tenga asignada la caja.
 
@@ -321,10 +321,10 @@ $$
 delimiter ;
 
 
-#Crear una nueva tabla Pedido, que almacena para cada artÃ­culo el nÃºmero de uds
+#Crear una nueva tabla Pedido, que almacena para cada artículo el número de uds
 #que se piden, la fecha en que se registra el pedido, la fecha en que se lleva a cabo,
-#y la fecha en que se recibe. Estos dos Ãºltimos campos tendrÃ¡n valor NULL mientras
-#no se pide y recibe el artÃ­culo, respectivamente.
+#y la fecha en que se recibe. Estos dos últimos campos tendrán valor NULL mientras
+#no se pide y recibe el artículo, respectivamente.
 
 create table pedido(
 
@@ -340,18 +340,18 @@ foreign key (art) references articulo(Cod_art)
 	on update cascade
 );
 
-#AÃ±adir a cada artÃ­culo un campo que indique el nÃºmero de uds Ã³ptimo que se deben
+#Añadir a cada artículo un campo que indique el número de uds óptimo que se deben
 #tener en tienda del mismo (por defecto 6).
 
 alter table articulo
 add column op_uds int default '6';
 	
 #Crear un procedimiento nuevo que
-#registre para cada artÃ­culo con X o menos uds disponibles (X es un valor variable)
-#una nueva lÃ­nea de pedido por tantas uds como hagan falta para alcanzar las uds
-#Ã³ptimas.
-#Se debe tener en cuenta que ya puede existir un pedido para ese artÃ­culo pendiente
-#de ser llevado a cabo. En ese caso, solamente se deberÃ¡ ajustar el nÃºmero de uds a
+#registre para cada artículo con X o menos uds disponibles (X es un valor variable)
+#una nueva línea de pedido por tantas uds como hagan falta para alcanzar las uds
+#óptimas.
+#Se debe tener en cuenta que ya puede existir un pedido para ese artículo pendiente
+#de ser llevado a cabo. En ese caso, solamente se deberá ajustar el número de uds a
 #pedir
 
 DROP PROCEDURE IF EXISTS registro_art;
@@ -377,7 +377,7 @@ $$
 
 delimiter ;
 
-#Crear un disparador que registre un nuevo pedido de un artÃ­culo cuando la tienda se
+#Crear un disparador que registre un nuevo pedido de un artículo cuando la tienda se
 #quede sin stock o con solo una unidad del mismo.
 
 delimiter $$
@@ -399,17 +399,27 @@ $$
 delimiter ;
 
 #Crear un procedimiento que ponga como recibido con la fecha actual el pedido de un
-#artÃ­culo dado, aumentando el stock del mismo en el nÃºmero de uds recibidas.
+#artículo dado, aumentando el stock del mismo en el número de uds recibidas.
 
 
 delimiter $$
 
 drop procedure if exists recb_art $$
+create procedure recb_pedido (in pedido int)
 
-create procedure recb_pedido (in pedido int);
 begin 
-	update pedido set f.fecha_rec = current_timestamp() and f.uds = f.
 	
-end
+	declare stock int;
+	declare nomb varchar(10);
+	
+	update pedido p set p.fecha_rec = current_timestamp();
+	select a.Uds from articulo a into stock;
+	select a.Descrip from articulo a into nomb;
+	update pedido p set p.uds = stock;
+	
+end;
+$$
 
 delimiter ;
+
+
