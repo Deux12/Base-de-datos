@@ -1,0 +1,82 @@
+drop database if exists instituto;
+
+create database instituto;
+
+use instituto;
+
+create table profesor (
+
+nrp int primary key,
+nombre_p varchar(50) not null
+);
+
+create table ciclo(
+
+cod_c int primary key auto_increment,
+nombre_c varchar(50) not null,
+familia int not null,
+grado enum('medio','superior'),
+fechabaja date not null,
+fechaalta date not null,
+tutor int,
+
+foreign key (tutor) references profesor(nrp)
+	on delete cascade
+	on update cascade
+);
+
+create table modulo (
+
+cod_m int primary key auto_increment,
+nombre_m varchar(50) not null,
+curso1 bool not null,
+sesiones int not null,
+horas timestamp not null,
+ciclo int,
+profesor int,
+
+foreign key (profesor) references profesor(nrp)
+	on delete cascade
+	on update cascade,
+	
+foreign key (ciclo) references ciclo(cod_c)
+	on delete cascade
+	on update cascade
+);
+
+create table alumno(
+
+dni char(9) primary key,
+nombre_a varchar(50) not null,
+fechaNac date not null,
+tlf char(9) not null
+
+);
+
+create table curso(
+
+ano date primary key,
+finalizado bool not null
+);
+
+create table curso_alumno (
+
+alumno char(9),
+curso date,
+fechaPd date not null,
+enviadoPd bool not null,
+faltas int not null,
+nota float not null,
+primary key(alumno, curso),
+
+foreign key (alumno) references alumno(dni)
+	on delete cascade 
+	on update cascade,
+	
+foreign key (curso) references curso(ano)
+	on delete cascade 
+	on update cascade
+
+);
+
+
