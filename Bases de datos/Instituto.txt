@@ -6,7 +6,7 @@ use instituto;
 
 create table profesor (
 
-nrp int primary key,
+nrp char(15) primary key,
 nombre_p varchar(50) not null
 );
 
@@ -14,11 +14,11 @@ create table ciclo(
 
 cod_c int primary key auto_increment,
 nombre_c varchar(50) not null,
-familia int not null,
+familia bool not null,
 grado enum('medio','superior'),
-fechabaja date not null,
-fechaalta date not null,
-tutor int,
+fechabaja date null,
+fechaalta date null,
+tutor char(15),
 
 foreign key (tutor) references profesor(nrp)
 	on delete cascade
@@ -31,9 +31,9 @@ cod_m int primary key auto_increment,
 nombre_m varchar(50) not null,
 curso1 bool not null,
 sesiones int not null,
-horas timestamp not null,
+horas int not null,
 ciclo int,
-profesor int,
+profesor char(15),
 
 foreign key (profesor) references profesor(nrp)
 	on delete cascade
@@ -78,5 +78,24 @@ foreign key (curso) references curso(ano)
 	on update cascade
 
 );
+
+insert into profesor (nrp,nombre_p)
+values ('5456787668A0590','Carlos'),('7859801457A0590','Xandre'),('5456782213A0590','Paquito'),('7859833324A0590','Anastasia');
+
+insert into ciclo (cod_c,nombre_c,familia,grado,fechabaja,fechaalta,tutor)
+values (1,'Jorge García Abichuelo',3,'superior','2002-01-11',null,'5456787668A0590'),
+(2,'Pocoyo Gutierrez Dominguez',2,'medio',null,'2012-02-21','7859801457A0590'),
+(3,'Rodolfo Langostino Mortadela',5,'medio','2020-10-22',null,'5456782213A0590'),
+(4,'Faustino Pinguino Menenguillo',0,'superior','2018-09-04',null,'7859833324A0590');
+
+insert into modulo (cod_m,nombre_m,curso1,sesiones,horas,ciclo,profesor)
+values (1,'Mates',true,10,5,2,'5456787668A0590'),
+(2,'Pinta y Colorea',false,7,5,1,'7859801457A0590'),
+(3,'Coñecemento do Medio',true,11,9,3,'5456782213A0590'),
+(4,'Manualidades',false,10,8,4,'7859833324A0590');
+
+insert into alumno (dni,nombre_a,fechaNac,tlf)
+values ('02302823V','El Sebas','2002-04-22','601642517'),
+('02317715M','El Yona','2003-06-20','601642513')
 
 
