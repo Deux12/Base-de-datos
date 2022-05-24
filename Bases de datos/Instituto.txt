@@ -149,6 +149,18 @@ where c2.ano = '2022' and m.sesiones < 20;
 # lo imparte en la actualidad. Se deben contar los alumnos que han perdido el derecho
 # a la evaluación continua, pero no aquellos que hayan sido dados de baja en el ciclo.
 
+SELECT c2.ano as AñoActual, m.nombre_m as NombreModulo, (select count(*) 
+FROM cursa as cm
+INNER JOIN modulo m ON m.cod_m = cm.modulo 
+INNER JOIN alumno a on a.dni = cm.alumno 
+INNER JOIN profesor p ON m.profesor = p.nrp) as NumAlumnos
+	FROM cursa as cm
+	INNER JOIN curso c2 ON c2.ano = cm.curso 
+	INNER JOIN modulo m ON m.cod_m = cm.modulo 
+	INNER JOIN alumno a on a.dni = cm.alumno 
+	INNER JOIN profesor p ON m.profesor = p.nrp
+	where c2.ano = '2022';
+
 
 # Mostrar el porcentaje de aprobados en el módulo “Programación” en todos los cursos ya
 # finalizados, sin tener en cuenta las bajas.
@@ -165,4 +177,9 @@ where c2.finalizado = 1 and m.nombre_m = "Programación";
 # Listar para el curso actual los alumnos de cada módulo a los que es necesario enviar el apercibimiento
 # de pérdida de derecho a la evaluación continua.
 
-
+SELECT a.nombre_a as NombreAlumno, m.nombre_m as NombreModulo
+FROM cursa as cm
+INNER JOIN curso c2 ON c2.ano = cm.curso 
+INNER JOIN modulo m ON m.cod_m = cm.modulo 
+INNER JOIN alumno a ON a.dni = cm.alumno 
+where c2.ano = 2022 and cm.enviadoPd = 1;
