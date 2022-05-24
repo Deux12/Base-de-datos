@@ -14,10 +14,8 @@ create table ciclo(
 
 cod_c int primary key auto_increment,
 nombre_c varchar(50) not null,
-familia bool not null,
+familia varchar(50) not null,
 grado enum('medio','superior'),
-fechabaja date null,
-fechaalta date null,
 tutor char(15),
 
 foreign key (tutor) references profesor(nrp)
@@ -55,19 +53,41 @@ tlf char(9) not null
 
 create table curso(
 
-ano date primary key,
+ano char(4) primary key,
 finalizado bool not null
 );
 
-create table curso_alumno (
+create table cursa (
 
 alumno char(9),
-curso date,
-fechaPd date not null,
+curso char(4),
+modulo int,
+fechaPd date null,
 enviadoPd bool not null,
 faltas int not null,
-nota float not null,
-primary key(alumno, curso),
+nota double not null,
+primary key(alumno, curso, modulo),
+
+foreign key (alumno) references alumno(dni)
+	on delete cascade 
+	on update cascade,
+	
+foreign key (modulo) references modulo(cod_m)
+	on delete cascade 
+	on update cascade,
+	
+foreign key (curso) references curso(ano)
+	on delete cascade 
+	on update cascade
+);
+
+create table matricula (
+alumno char(9),
+curso char(4),
+ciclo int,
+fechabaja date null,
+fechaalta date null,
+primary key (alumno,curso),
 
 foreign key (alumno) references alumno(dni)
 	on delete cascade 
@@ -76,26 +96,73 @@ foreign key (alumno) references alumno(dni)
 foreign key (curso) references curso(ano)
 	on delete cascade 
 	on update cascade
-
 );
 
-insert into profesor (nrp,nombre_p)
-values ('5456787668A0590','Carlos'),('7859801457A0590','Xandre'),('5456782213A0590','Paquito'),('7859833324A0590','Anastasia');
 
-insert into ciclo (cod_c,nombre_c,familia,grado,fechabaja,fechaalta,tutor)
-values (1,'Jorge García Abichuelo',3,'superior','2002-01-11',null,'5456787668A0590'),
-(2,'Pocoyo Gutierrez Dominguez',2,'medio',null,'2012-02-21','7859801457A0590'),
-(3,'Rodolfo Langostino Mortadela',5,'medio','2020-10-22',null,'5456782213A0590'),
-(4,'Faustino Pinguino Menenguillo',0,'superior','2018-09-04',null,'7859833324A0590');
+
+insert into profesor (nrp,nombre_p)
+values ('5456787668A0590','Carlos'),
+('7859801457A0590','Xandre'),
+('5456782213A0590','Paquito'),
+('7859833324A0590','Anastasia');
+
+insert into ciclo (cod_c,nombre_c,familia,grado,tutor)
+values (1,'DAM','informática','superior','5456787668A0590'),
+(2,'Charcutería','Mercadona','medio','7859801457A0590'),
+(3,'Joyería','Rolex','medio','5456782213A0590'),
+(4,'Alpacador','Hierba Seca','superior','7859833324A0590');
 
 insert into modulo (cod_m,nombre_m,curso1,sesiones,horas,ciclo,profesor)
-values (1,'Mates',true,10,5,2,'5456787668A0590'),
-(2,'Pinta y Colorea',false,7,5,1,'7859801457A0590'),
-(3,'Coñecemento do Medio',true,11,9,3,'5456782213A0590'),
+values (1,'Programación',true,10,5,2,'5456787668A0590'),
+(2,'Programación',false,7,5,1,'7859801457A0590'),
+(3,'Coñecemento do Medio',true,20,9,3,'5456782213A0590'),
 (4,'Manualidades',false,10,8,4,'7859833324A0590');
 
 insert into alumno (dni,nombre_a,fechaNac,tlf)
 values ('02302823V','El Sebas','2002-04-22','601642517'),
-('02317715M','El Yona','2003-06-20','601642513')
+('02317715M','El Yona','2003-06-20','601642513'),
+('02747669C','Peter Pan','2003-08-20','601633513');
+
+insert into curso (ano,finalizado)
+values ('2020',true),
+('2022',true);
+
+insert into cursa (alumno,curso,modulo,fechaPd,enviadoPd,faltas,nota)
+values ('02302823V','2020',1,'2022-11-02',false,10,'7.5'),
+('02317715M','2022',2,'2022-11-02',true,20,'4.0'),
+('02747669C','2022',3,'2022-11-02',true,20,'8.0');
+
+insert into matricula (alumno,curso,ciclo,fechabaja,fechaalta)
+values ('02302823V','2020',1,'2022-12-01',null),
+('02317715M','2020',1,null,'2022-12-01');
+
+# Mostrar para el curso actual los profesores que están impartiendo menos de 20 sesiones semanales.
+
+SELECT p.nombre_p as Profesor
+FROM cursa as cm
+INNER JOIN curso c2 ON c2.ano = cm.curso 
+INNER JOIN modulo m ON m.cod_m = cm.modulo 
+INNER JOIN profesor p ON m.profesor = p.nrp
+where c2.ano = '2022' and m.sesiones < 20;
+
+# Mostrar para el curso actual, el número de alumnos por módulo con el profesor que
+# lo imparte en la actualidad. Se deben contar los alumnos que han perdido el derecho
+# a la evaluación continua, pero no aquellos que hayan sido dados de baja en el ciclo.
+
+
+# Mostrar el porcentaje de aprobados en el módulo “Programación” en todos los cursos ya
+# finalizados, sin tener en cuenta las bajas.
+
+select concat ( (select count(*) FROM cursa cm
+INNER JOIN curso c2 ON c2.ano = cm.curso 
+INNER JOIN modulo m ON m.cod_m = cm.modulo 
+where c2.finalizado = 1 and m.nombre_m = "Programación" and cm.nota >= 5) *100/count(cm.nota), '%') as PorcentajeAprobados 
+FROM cursa cm
+INNER JOIN curso c2 ON c2.ano = cm.curso 
+INNER JOIN modulo m ON m.cod_m = cm.modulo 
+where c2.finalizado = 1 and m.nombre_m = "Programación";
+
+# Listar para el curso actual los alumnos de cada módulo a los que es necesario enviar el apercibimiento
+# de pérdida de derecho a la evaluación continua.
 
 
