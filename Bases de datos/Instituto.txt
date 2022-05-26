@@ -108,15 +108,15 @@ values ('5456787668A0590','Carlos'),
 
 insert into ciclo (cod_c,nombre_c,familia,grado,tutor)
 values (1,'DAM','informática','superior','5456787668A0590'),
-(2,'Charcutería','Mercadona','medio','7859801457A0590'),
-(3,'Joyería','Rolex','medio','5456782213A0590'),
-(4,'Alpacador','Hierba Seca','superior','7859833324A0590');
+(2,'DAW','informática','medio','7859801457A0590'),
+(3,'ASIR','informática','medio','5456782213A0590'),
+(4,'SMR','informática','superior','7859833324A0590');
 
 insert into modulo (cod_m,nombre_m,curso1,sesiones,horas,ciclo,profesor)
 values (1,'Programación',true,10,5,2,'5456787668A0590'),
 (2,'Programación',false,7,5,1,'7859801457A0590'),
-(3,'Coñecemento do Medio',true,20,9,3,'5456782213A0590'),
-(4,'Manualidades',false,10,8,4,'7859833324A0590');
+(3,'Bases de Datos',true,20,9,3,'5456782213A0590'),
+(4,'Lenguaje de Marcas',false,10,8,4,'7859833324A0590');
 
 insert into alumno (dni,nombre_a,fechaNac,tlf)
 values ('02302823V','El Sebas','2002-04-22','601642517'),
@@ -125,7 +125,7 @@ values ('02302823V','El Sebas','2002-04-22','601642517'),
 
 insert into curso (ano,finalizado)
 values ('2020',true),
-('2022',true);
+('2022',false);
 
 insert into cursa (alumno,curso,modulo,fechaPd,enviadoPd,faltas,nota)
 values ('02302823V','2020',1,'2022-11-02',false,10,'7.5'),
@@ -134,7 +134,8 @@ values ('02302823V','2020',1,'2022-11-02',false,10,'7.5'),
 
 insert into matricula (alumno,curso,ciclo,fechabaja,fechaalta)
 values ('02302823V','2020',1,'2022-12-01',null),
-('02317715M','2020',1,null,'2022-12-01');
+('02317715M','2020',1,null,'2022-12-01'),
+('02317715M','2022',4,null,'2022-12-01');
 
 # Mostrar para el curso actual los profesores que están impartiendo menos de 20 sesiones semanales.
 
@@ -152,7 +153,7 @@ where c2.ano = '2022' and m.sesiones < 20;
 SELECT c2.ano as AñoActual, m.nombre_m as NombreModulo, (select count(*) 
 FROM cursa as cm
 INNER JOIN modulo m ON m.cod_m = cm.modulo 
-INNER JOIN alumno a on a.dni = cm.alumno 
+INNER JOIN (select a2.dni from alumno as a2, matricula as m2 where a2.dni = m2.alumno and m2.fechabaja is not null) as tbl on tbl.dni = cm.alumno 
 INNER JOIN profesor p ON m.profesor = p.nrp) as NumAlumnos
 	FROM cursa as cm
 	INNER JOIN curso c2 ON c2.ano = cm.curso 
@@ -183,3 +184,95 @@ INNER JOIN curso c2 ON c2.ano = cm.curso
 INNER JOIN modulo m ON m.cod_m = cm.modulo 
 INNER JOIN alumno a ON a.dni = cm.alumno 
 where c2.ano = 2022 and cm.enviadoPd = 1;
+
+# Con posterioridad a la implantación del sistema informatizado, se advierte que existen en el curso actual
+# alumnos matriculados erróneamente en módulos de distintos ciclos. Para solucionar el problema y que no se vuelva a producir, se pide:
+# Si es necesario, modificar la BD para poder conocer, por cada curso académico en qué ciclo se matriculan los alumnos.
+
+SELECT c.ano as CursoAcademico,c2.nombre_c as NombreCiclo, a.nombre_a as NombreAlumno
+FROM matricula m
+INNER JOIN curso c ON c.ano = m.curso  
+INNER JOIN ciclo c2  ON c2.cod_c = m.ciclo 
+INNER JOIN alumno a ON a.dni = m.alumno;
+
+# Programar una función que obtenga el código del curso actual.
+
+# ACTIVAMOS LA PINCHE VARIABLE GLOBAL
+SET GLOBAL LOG_BIN_TRUST_FUNCTION_CREATORS = 1;
+
+delimiter $$
+
+drop function if exists obtenerCodAct  $$
+create function obtenerCodAct ()
+returns char(4)
+
+begin
+	declare anoActu int;
+	declare codActu char(4);
+
+	select YEAR(NOW()) into anoActu;
+	select c.ano into codActu
+	from curso c where c.finalizado = '0' order by c.ano desc limit 1;
+
+	return codActu;
+end;
+$$
+
+delimiter ;
+ /*Comprobación */ select obtenerCodAct();
+
+# Para aquellos alumnos del curso actual que están cursando módulos que no se
+# corresponden con el ciclo que figura en su impreso de matrícula, listar las 
+# parejas alumno – módulo. Utilizar la función programada en el punto anterior.
+
+SELECT c.ano as CursoAcademico,m, a.nombre_a as NombreAlumno
+FROM matricula m
+INNER JOIN curso c ON c.ano = m.curso  
+INNER JOIN ciclo c2  ON c2.cod_c = m.ciclo 
+INNER JOIN alumno a ON a.dni = m.alumno;
+
+ # Escribir el SQL necesario para añadir a la BD un mecanismo que impida que un
+ # alumno curse módulos que no se correspondan con el ciclo en que se haya matriculado.
+
+# Escribir el SQL necesario para añadir a la BD un mecanismo que impida modificar el ciclo
+# en que está matriculado un alumno si ya se le ha asignado algún módulo.
+
+# ¿Habría alguna forma de incorporar en un único mecanismo las dos restricciones anteriores?
+# En caso afirmativo, indícalo.
+
+# Crear una vista que muestre, para los módulos que imparte el profesor conectado al SGBD,
+# los alumnos matriculados, sus notas y sus faltas.
+
+SELECT LEFT(CURRENT_USER(), INSTR(CURRENT_USER(), '@') - 1);
+
+create view modulosImpartidos as
+
+SELECT m.nombre_m , a.nombre_a , cm.nota , cm.faltas 
+FROM cursa as cm
+INNER JOIN curso c2 ON c2.ano = cm.curso 
+INNER JOIN modulo m ON m.cod_m = cm.modulo 
+inner join alumno a on a.dni = cm.alumno 
+INNER JOIN profesor p ON m.profesor = p.nrp
+where p.nrp = LEFT(CURRENT_USER(), INSTR(CURRENT_USER(), '@') - 1);
+
+# Crear una segunda vista que muestre para el profesor conectado al SGBD, los alumnos de los que es tutor,
+# con el número de faltas por módulo y la información de si se ha enviado o no el apercibimiento,
+# o si el alumno ha perdido el derecho a la evaluación continua, y en qué fechas.
+
+# Crear dos roles en la BD: administrador y profesor.
+
+drop role if exists administrador;
+drop role if exists profesor;
+
+create role administrador;
+create role profesor;
+
+# Definir permisos sobre las vistas anteriores de forma que los usuarios con el rol profesor solo puedan modificar
+# las notas y el número de faltas de los módulos que imparten y la información relacionada con la pérdida de derecho
+# a la evaluación continua de los alumnos de los que son tutores. Los usuarios con el role administrador tienen permisos
+# totales sobre las mismas.
+
+# No se debe permitir cerrar un curso académico si existen alumnos sin calificar que no hayan sido dados de baja.
+
+# Crear un procedimiento que ponga la nota que se le pase como parámetro a aquellos alumnos del curso actual que no tengan
+# nota ni hayan sido dados de baja. A continuación debe finalizar el curso académico actual y dar de alta el siguiente.
